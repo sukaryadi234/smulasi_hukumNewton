@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorium Maya - Hukum II Newton</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome untuk ikon menarik -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar untuk tampilan premium */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Aturan CSS khusus agar kartu istilah masuk secara presisi di dalam slot target */
+        .zone-slot .term-card {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default !important;
+            text-align: center;
+        }
+        /* Sembunyikan ikon penyeretan saat kartu sudah berhasil diletakkan */
+        .zone-slot .term-card i {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+                <!-- LOGO FISIKA: Menggunakan Atom Berputar secara Elegan -->
+                <div class="bg-teal-500 p-2 rounded-lg text-white shadow-md flex items-center justify-center animate-pulse">
+                    <i class="fa-solid fa-atom text-xl animate-spin" style="animation-duration: 4s;"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-tight">LABORATORIUM MAYA FISIKA</h1>
+                    <p class="text-[11px] text-slate-300">Percobaan Hukum II Newton &bull; Kelas XI / Fase F</p>
+                </div>
+            </div>
+            
+            <!-- Menu Navigasi Utama -->
+            <nav class="flex flex-wrap gap-1.5">
+                <button onclick="switchTab('simulasi')" id="btn-simulasi" class="tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-teal-500 text-white shadow-md">
+                    <i class="fa-solid fa-gauge-high mr-1"></i> Simulasi Lab
+                </button>
+                <button onclick="switchTab('teori')" id="btn-teori" class="tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                    <i class="fa-solid fa-book-open mr-1"></i> Teori
+                </button>
+                <button onclick="switchTab('langkah')" id="btn-langkah" class="tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                    <i class="fa-solid fa-list-check mr-1"></i> Langkah Kerja
+                </button>
+                <button onclick="switchTab('kesimpulan')" id="btn-kesimpulan" class="tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                    <i class="fa-solid fa-clipboard-question mr-1"></i> Kesimpulan
+                </button>
+                <!-- Tombol Menu: Soal Latihan -->
+                <button onclick="switchTab('latihan')" id="btn-latihan" class="tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                    <i class="fa-solid fa-graduation-cap mr-1"></i> Soal Latihan
+                </button>
+                <button onclick="switchTab('pengembang')" id="btn-pengembang" class="tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-slate-700 hover:bg-slate-600 text-slate-200">
+                    <i class="fa-solid fa-circle-user mr-1"></i> Pengembang
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-3 md:p-4">
+        
+        <!-- ================= TAB 1: SIMULASI & GRAFIK (KOMPAK SATU HALAMAN) ================= -->
+        <div id="tab-simulasi" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Panel Kontrol Parameter (Kiri - Kompak) -->
+            <div class="lg:col-span-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center pb-1.5 border-b border-gray-100">
+                        <h2 class="text-base font-bold text-gray-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-teal-600"></i> Variabel Percobaan
+                        </h2>
+                        <!-- Suara Mute/Unmute -->
+                        <button id="btn-sound" onclick="toggleSound()" class="text-slate-500 hover:text-teal-600 transition-colors p-1.5 rounded-lg bg-gray-100" title="Aktifkan/Matikan Suara">
+                            <i id="sound-icon" class="fa-solid fa-volume-high text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Slider 1: Massa (m) -->
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-xs font-semibold text-gray-700">Massa Balok (<i>m</i>)</label>
+                            <span class="text-[10px] bg-teal-100 text-teal-800 font-bold px-1.5 py-0.5 rounded" id="val-massa">5.0 kg</span>
+                        </div>
+                        <input type="range" id="slide-massa" min="1" max="10" step="0.1" value="5.0" class="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSimulation()">
+                        <div class="flex justify-between text-[9px] text-gray-400 mt-0.5 font-semibold">
+                            <span>1 kg</span>
+                            <span>5 kg</span>
+                            <span>10 kg</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider 2: Gaya Tarik (F) -->
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-xs font-semibold text-gray-700">Gaya Tarik (<i>F</i>)</label>
+                            <span class="text-[10px] bg-teal-100 text-teal-800 font-bold px-1.5 py-0.5 rounded" id="val-gaya">10 N</span>
+                        </div>
+                        <input type="range" id="slide-gaya" min="1" max="20" step="0.5" value="10" class="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSimulation()">
+                        <div class="flex justify-between text-[9px] text-gray-400 mt-0.5 font-semibold">
+                            <span>1 N</span>
+                            <span>10 N</span>
+                            <span>20 N</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider 3: Koefisien Gesek Kinetik (mu) -->
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-xs font-semibold text-gray-700">Koefisien Gesek (<i>&mu;<sub>k</sub></i>)</label>
+                            <span class="text-[10px] bg-teal-100 text-teal-800 font-bold px-1.5 py-0.5 rounded" id="val-gesek">0.20</span>
+                        </div>
+                        <input type="range" id="slide-gesek" min="0" max="1" step="0.01" value="0.20" class="w-full accent-teal-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSimulation()">
+                        <div class="flex justify-between text-[9px] text-gray-400 mt-0.5 font-semibold">
+                            <span>0.00 (Licin)</span>
+                            <span>0.50</span>
+                            <span>1.00 (Kasar)</span>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Perhitungan Teoretis -->
+                    <div class="bg-slate-800 text-slate-100 p-3 rounded-lg shadow-inner space-y-1.5 text-xs">
+                        <div class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Data Perhitungan</div>
+                        <div class="flex justify-between">
+                            <span>Gaya Normal (<i>N = m &bull; g</i>):</span>
+                            <span class="font-mono font-bold" id="calc-normal">49.00 N</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Gaya Gesek (<i>f<sub>k</sub> = &mu;<sub>k</sub> &bull; N</i>):</span>
+                            <span class="font-mono font-bold text-amber-400" id="calc-gesek">9.80 N</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-700 pt-1">
+                            <span>Gaya Netto (<i>&Sigma;F</i>):</span>
+                            <span class="font-mono font-bold text-cyan-400" id="calc-netto">0.20 N</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-slate-700 pt-1">
+                            <span class="font-semibold text-teal-300">Percepatan (<i>a</i>):</span>
+                            <span class="font-mono text-sm font-extrabold" id="calc-percepatan">0.04 m/s<sup>2</sup></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Navigasi Simulasi -->
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button id="btn-start" onclick="togglePlay()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-3 rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5">
+                        <i id="play-icon" class="fa-solid fa-play"></i> <span id="play-text">Jalankan</span>
+                    </button>
+                    <button onclick="resetSimulation()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold py-2.5 px-3 rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Animasi dan Grafik (Kanan - Kompak) -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+                
+                <!-- Visualisasi Gerak Benda -->
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-cubes text-teal-600"></i> Visualisasi Dinamika Gerak
+                        </h2>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono" id="sim-status">Status: Diam</span>
+                    </div>
+
+                    <!-- Canvas Area -->
+                    <div class="relative bg-slate-50 rounded-lg overflow-hidden border border-slate-200 h-44 flex items-end">
+                        <canvas id="sim-canvas" class="w-full h-full block"></canvas>
+                        
+                        <!-- HUD Informasi Melayang -->
+                        <div class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur text-white text-[10px] p-2 rounded shadow-md z-10 space-y-0.5 font-mono">
+                            <div>Kecepatan (<i>v</i>): <span id="hud-vel" class="text-green-400">0.00 m/s</span></div>
+                            <div>Posisi (<i>x</i>): <span id="hud-pos" class="text-blue-400">0.00 m</span></div>
+                            <div>Gravitasi (<i>g</i>): <span class="text-purple-400">9.8 m/s<sup>2</sup></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Hasil Eksperimen Ganda (Tiga Grafik Kompak Sejajar) -->
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex-grow">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-gray-100 pb-2">
+                        <div>
+                            <h2 class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-chart-line text-teal-600"></i> Grafik Analisis Gerak
+                            </h2>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="rekamTitikData()" class="bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-bold px-2 py-1.5 rounded-md transition-colors flex items-center gap-1 shadow-sm" title="Simpan titik saat ini ke Grafik 1 dan Grafik 2">
+                                <i class="fa-solid fa-camera"></i> Ambil Titik Data
+                            </button>
+                            <button onclick="clearGraph()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-2 py-1.5 rounded-md transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> Bersihkan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tiga grafik sejajar/grid responsif -->
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                        <!-- Grafik 1: a vs F -->
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-500 mb-1 text-center">
+                                a vs Gaya Tarik (F)
+                            </span>
+                            <div class="relative h-44 w-full bg-slate-50 p-1 rounded-lg border border-slate-100">
+                                <canvas id="graph-canvas"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Grafik 2: a vs m -->
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-500 mb-1 text-center">
+                                a vs Massa (m)
+                            </span>
+                            <div class="relative h-44 w-full bg-slate-50 p-1 rounded-lg border border-slate-100">
+                                <canvas id="graph-massa-canvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Grafik 3: v vs t -->
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-500 mb-1 text-center">
+                                Kecepatan (v) vs Waktu (t)
+                            </span>
+                            <div class="relative h-44 w-full bg-slate-50 p-1 rounded-lg border border-slate-100">
+                                <canvas id="graph-waktu-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: KAJIAN TEORI ================= -->
+        <div id="tab-teori" class="tab-content hidden bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6 animate-fadeIn">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-book-open text-teal-600 mr-2"></i>Kajian Teori: Hukum II Newton</h2>
+                <p class="text-sm text-gray-500 mt-1">Materi Dinamika Partikel - Fisika Kelas XI / Fase F</p>
+            </div>
+            
+            <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4">
+                <p>
+                    <b>Hukum II Newton</b> menyatakan bahwa perubahan gerak (percepatan) sebanding dengan gaya netto yang bekerja pada benda tersebut dan searah dengan gaya itu, serta berbanding terbalik dengan massa benda. 
+                </p>
+
+                <!-- Formula Highlight Box -->
+                <div class="bg-slate-50 border-l-4 border-teal-500 p-4 rounded-r-xl my-4 flex flex-col md:flex-row items-center justify-around gap-4 shadow-sm">
+                    <div class="text-center md:text-left">
+                        <p class="text-xs font-bold text-teal-600 uppercase tracking-wider">Persamaan Utama Hukum II Newton</p>
+                        <div class="text-xl md:text-2xl font-mono font-bold text-slate-800 mt-1">
+                            &Sigma;F = m &bull; a &nbsp; atau &nbsp; a = &Sigma;F / m
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-600 space-y-1 border-t md:border-t-0 md:border-l border-slate-200 pt-3 md:pt-0 md:pl-6">
+                        <div>&bull; <b>&Sigma;F</b> = Gaya netto yang bekerja pada benda (Newton atau N)</div>
+                        <div>&bull; <b>m</b> = Massa benda (Kilogram atau kg)</div>
+                        <div>&bull; <b>a</b> = Percepatan benda (m/s<sup>2</sup>)</div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 mt-6 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-teal-600"></i> Pengaruh Gaya Gesek Kinetik
+                </h3>
+                <p>
+                    Pada kondisi nyata di dunia fisik, permukaan sentuh antar benda tidak selalu mulus sempurna. Kurang kasarnya permukaan sentuh ini menimbulkan gaya hambat yang dinamakan <b>Gaya Gesek Kinetik (f<sub>k</sub>)</b> saat benda bergerak. Besarnya gaya gesek kinetik dipengaruhi oleh koefisien gesek kinetik (&mu;<sub>k</sub>) and Gaya Normal (N):
+                </p>
+                
+                <div class="font-mono text-center text-lg font-bold bg-slate-50 py-3 rounded-lg border border-slate-100">
+                    f<sub>k</sub> = &mu;<sub>k</sub> &bull; N
+                </div>
+
+                <p>
+                    Karena balok berada pada bidang horizontal, maka besar Gaya Normal sama dengan berat benda:
+                </p>
+
+                <div class="font-mono text-center text-lg font-bold bg-slate-50 py-3 rounded-lg border border-slate-100">
+                    N = m &bull; g
+                </div>
+
+                <p>
+                    Sehingga, jika ada gaya tarik horizontal F, gaya netto &Sigma;F yang menggerakkan benda dituliskan:
+                </p>
+
+                <div class="font-mono text-center text-lg font-bold bg-teal-50 text-teal-900 py-4 rounded-lg border border-teal-100">
+                    &Sigma;F = F - f<sub>k</sub> <br>
+                    &rArr; a = (F - &mu;<sub>k</sub> &bull; m &bull; g) / m
+                </div>
+
+                <p class="text-sm bg-amber-50 text-amber-900 border-l-4 border-amber-500 p-3.5 rounded-r-lg">
+                    <b>Catatan Penting:</b> Balok baru akan mulai bergerak apabila gaya tarik horizontal F lebih besar daripada gaya gesek kinetik maksimum (f<sub>k</sub>). Di laboratorium maya ini, untuk menyederhanakan pemahaman konseptual Fase F, digunakan pendekatan nilai gaya gesek kinetik konstan sejak awal gaya diberikan. Jika gaya gesek melebihi gaya tarik (f<sub>k</sub> &gt; F), balok akan tetap diam (a = 0).
+                </p>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: LANGKAH KERJA / LKPD ================= -->
+        <div id="tab-langkah" class="tab-content hidden bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6 animate-fadeIn">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-list-check text-teal-600 mr-2"></i>Langkah Kerja (Lembar Kerja Murid)</h2>
+                <p class="text-sm text-gray-500 mt-1">Panduan Penggunaan Laboratorium Maya Hukum II Newton</p>
+            </div>
+
+            <div class="space-y-6 text-gray-700">
+                
+                <!-- Tujuan -->
+                <div class="bg-teal-50 p-4 rounded-xl border border-teal-100">
+                    <h3 class="font-bold text-teal-900 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran</h3>
+                    <ul class="list-disc list-inside mt-2 text-sm text-teal-950 space-y-1">
+                        <li>Menganalisis hubungan antara percepatan (a) benda dengan gaya tarik (F) yang diberikan saat massa (m) bernilai konstan.</li>
+                        <li>Menganalisis hubungan antara percepatan (a) benda dengan massa benda (m) saat gaya tarik (F) bernilai konstan.</li>
+                        <li>Mengamati pengaruh koefisien gesek (&mu;) terhadap percepatan gerak benda.</li>
+                        <li>Mengamati bentuk grafik grafik kecepatan (v) terhadap waktu (t) untuk mengidentifikasi karakteristik Gerak Lurus Berubah Beraturan (GLBB).</li>
+                    </ul>
+                </div>
+
+                <!-- Alat dan Bahan -->
+                <div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-2"><i class="fa-solid fa-toolbox text-teal-600 mr-1"></i> Alat dan Bahan Percobaan</h3>
+                    <ol class="list-decimal list-inside pl-2 space-y-1.5 text-sm">
+                        <li>Perangkat simulasi laboratorium virtual dinamika benda.</li>
+                        <li>Slider pengatur variabel Massa (1 kg - 10 kg).</li>
+                        <li>Slider pengatur variabel Gaya (1 N - 20 N).</li>
+                        <li>Slider pengatur variabel Koefisien Gesek (0 - 1).</li>
+                        <li>Tiga buah grafik perekam data: (a vs F), (a vs m), dan (v vs t).</li>
+                    </ol>
+                </div>
+
+                <!-- Prosedur Eksperimen -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-slate-800 text-lg"><i class="fa-solid fa-clipboard-list text-teal-600 mr-1"></i> Prosedur Eksperimen</h3>
+                    
+                    <!-- Kegiatan 1 -->
+                    <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
+                        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2">
+                            <span class="bg-teal-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">1</span>
+                            Kegiatan 1: Hubungan Gaya (F) dengan Percepatan (a) - Massa Konstan
+                        </h4>
+                        <ul class="list-disc list-inside pl-4 text-xs space-y-1 text-slate-600">
+                            <li>Atur nilai <strong class="text-slate-800">Massa (m)</strong> menjadi tetap, contohnya <strong class="text-slate-800">5.0 kg</strong>.</li>
+                            <li>Atur <strong class="text-slate-800">Koefisien Gesek</strong> menjadi <strong class="text-slate-800">0.00</strong> (kondisi tanpa gaya gesek).</li>
+                            <li>Ubah-ubah nilai <strong class="text-slate-800">Gaya (F)</strong> mulai dari <strong class="text-slate-800">2 N, 4 N, 6 N, 8 N, hingga 10 N</strong>.</li>
+                            <li>Pada setiap perubahan gaya, amati nilai <strong class="text-slate-800">Percepatan (a)</strong> yang dihasilkan.</li>
+                            <li>Tekan tombol <strong class="text-slate-800">"Ambil Titik Data"</strong> di atas grafik untuk menyimpan visualisasi titik data ke dalam grafik.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Kegiatan 2 -->
+                    <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
+                        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2">
+                            <span class="bg-teal-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">2</span>
+                            Kegiatan 2: Hubungan Massa (m) dengan Percepatan (a) - Gaya Konstan
+                        </h4>
+                        <ul class="list-disc list-inside pl-4 text-xs space-y-1 text-slate-600">
+                            <li>Atur nilai <strong class="text-slate-800">Gaya Tarik (F)</strong> menjadi tetap, contohnya <strong class="text-slate-800">10 N</strong>.</li>
+                            <li>Atur <strong class="text-slate-800">Koefisien Gesek</strong> tetap pada <strong class="text-slate-800">0.00</strong>.</li>
+                            <li>Ubah-ubah nilai <strong class="text-slate-800">Massa (m)</strong> mulai dari <strong class="text-slate-800">2 kg, 4 kg, 6 kg, 8 kg, hingga 10 kg</strong>.</li>
+                            <li>Amati perubahan nilai <strong class="text-slate-800">Percepatan (a)</strong> yang terjadi.</li>
+                            <li>Analisis bagaimana pengaruh penambahan massa terhadap kemiringan garis di Grafik 2.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Kegiatan 3 -->
+                    <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
+                        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2">
+                            <span class="bg-teal-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">3</span>
+                            Kegiatan 3: Hubungan Kecepatan (v) and Waktu (t) selama Bergerak
+                        </h4>
+                        <ul class="list-disc list-inside pl-4 text-xs space-y-1 text-slate-600">
+                            <li>Atur nilai <strong class="text-slate-800">Massa (m) = 5.0 kg</strong>, <strong class="text-slate-800">Gaya (F) = 15 N</strong>, dan <strong class="text-slate-800">Koefisien Gesek = 0.10</strong>.</li>
+                            <li>Klik tombol <strong class="text-slate-800">"Jalankan"</strong> dan amati pergerakan balok pada visualisasi canvas.</li>
+                            <li>Perhatikan garis merah yang tergambar secara real-time pada <strong class="text-slate-800">Grafik 3: Kecepatan (v) vs Waktu (t)</strong>.</li>
+                            <li>Analisis mengapa kurva tersebut berbentuk garis lurus miring ke atas (menunjukkan adanya percepatan linear konstan).</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: KESIMPULAN ================= -->
+        <div id="tab-kesimpulan" class="tab-content hidden bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6 animate-fadeIn">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-clipboard-question text-teal-600 mr-2"></i>Kesimpulan Eksperimen</h2>
+                <p class="text-sm text-gray-500 mt-1">Gunakan poin kesimpulan ini untuk mengonfirmasi hasil temuan Anda</p>
+            </div>
+
+            <div class="space-y-4 text-gray-700">
+                <p class="text-slate-600">
+                    Berdasarkan aktivitas eksplorasi yang telah dilakukan menggunakan simulasi laboratorium maya ini, berikut beberapa kesimpulan fisis yang diperoleh:
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    
+                    <!-- Poin 1 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <div class="flex items-center gap-3 text-teal-700 font-bold mb-2">
+                            <i class="fa-solid fa-circle-check text-lg"></i>
+                            <h4>Hubungan Percepatan (a) and Gaya (F)</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Ketika massa (m) balok dijaga konstan, grafik percepatan (a) terhadap gaya tarik (F) membentuk <strong class="text-slate-900">garis lurus linear naik</strong>. Hal ini membuktikan bahwa <strong class="text-teal-700">percepatan berbanding lurus dengan gaya netto yang bekerja pada benda</strong> (a berbanding lurus dengan &Sigma;F). Semakin besar gaya dorong/tarik, semakin cepat benda melaju.
+                        </p>
+                    </div>
+
+                    <!-- Poin 2 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <div class="flex items-center gap-3 text-teal-700 font-bold mb-2">
+                            <i class="fa-solid fa-circle-check text-lg"></i>
+                            <h4>Hubungan Percepatan (a) and Massa (m)</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Ketika gaya (F) dipertahankan konstan, penambahan massa (m) mengakibatkan nilai percepatan (a) <strong class="text-slate-900">semakin mengecil secara hiperbolik</strong>. Hal ini membuktikan bahwa <strong class="text-teal-700">percepatan berbanding terbalik dengan massa benda</strong> (a berbanding lurus dengan 1/m). Semakin masif suatu benda, semakin sulit benda tersebut mengalami perubahan gerak (kelembaman besar).
+                        </p>
+                    </div>
+
+                    <!-- Poin 3 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <div class="flex items-center gap-3 text-teal-700 font-bold mb-2">
+                            <i class="fa-solid fa-circle-check text-lg"></i>
+                            <h4>Pengaruh Gesekan Permukaan</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Kehadiran koefisien gesek (&mu;) menimbulkan gaya gesek (f<sub>k</sub>) yang arahnya berlawanan dengan arah gerak benda. Gaya gesek ini <strong class="text-slate-900">mengurangi gaya neto</strong> (&Sigma;F = F - f<sub>k</sub>), sehingga turnaround nilai percepatan. Jika gaya gesek lebih besar dari gaya luar, benda akan tetap diam dengan percepatan nol.
+                        </p>
+                    </div>
+
+                    <!-- Poin 4 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <div class="flex items-center gap-3 text-teal-700 font-bold mb-2">
+                            <i class="fa-solid fa-circle-check text-lg"></i>
+                            <h4>Analisis Grafik Kecepatan (v) vs Waktu (t)</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Garis linear miring ke atas pada grafik v-t membuktikan bahwa benda mengalami **Gerak Lurus Berubah Beraturan (GLBB) Dipercepat**. Kemiringan (*gradien*) dari grafik v-t ini merepresentasikan secara langsung besarnya **Percepatan (a)**. Semakin curam grafik v-t, semakin besar percepatan gerak benda tersebut.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Self-reflection box -->
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-amber-900 text-xs flex gap-3 items-start mt-4">
+                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg mt-0.5"></i>
+                    <div>
+                        <strong>Tugas Mandiri:</strong> Bandingkan nilai percepatan teoretis yang Anda hitung menggunakan rumus a = (F - &mu; &bull; m &bull; g) / m dengan kemiringan garis (gradien) yang terbentuk pada grafik Kecepatan-Waktu di layar. Apakah kemiringannya cocok dengan nilai percepatannya?
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: SOAL LATIHAN (PAGINATION/WIZARD - ULTRA KOMPAK) ================= -->
+        <div id="tab-latihan" class="tab-content hidden bg-white p-4 rounded-xl shadow-sm border border-gray-200 max-w-4xl mx-auto space-y-3">
+            <div class="border-b border-gray-200 pb-2">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-graduation-cap text-teal-600"></i>
+                    <span>Soal Latihan Interaktif</span>
+                </h2>
+            </div>
+
+            <!-- Progress Stepper (Indikator Soal Aktif - Lebih Ramping) -->
+            <div class="flex items-center justify-between max-w-md mx-auto mb-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <div class="flex items-center flex-1">
+                    <div id="step-i-1" class="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-xs shadow transition-colors">1</div>
+                    <div id="step-l-1" class="h-0.5 flex-grow bg-slate-200 mx-1 transition-colors"></div>
+                </div>
+                <div class="flex items-center flex-1">
+                    <div id="step-i-2" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs transition-colors">2</div>
+                    <div id="step-l-2" class="h-0.5 flex-grow bg-slate-200 mx-1 transition-colors"></div>
+                </div>
+                <div class="flex items-center flex-1">
+                    <div id="step-i-3" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs transition-colors">3</div>
+                    <div id="step-l-3" class="h-0.5 flex-grow bg-slate-200 mx-1 transition-colors"></div>
+                </div>
+                <div class="flex items-center flex-1">
+                    <div id="step-i-4" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs transition-colors">4</div>
+                    <div id="step-l-4" class="h-0.5 flex-grow bg-slate-200 mx-1 transition-colors"></div>
+                </div>
+                <div class="flex items-center">
+                    <div id="step-i-5" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs transition-colors"><i class="fa-solid fa-trophy text-[10px]"></i></div>
+                </div>
+            </div>
+
+            <!-- CONTAINER SOAL WIZARD -->
+            <div id="quiz-wizard-container" class="min-h-[290px] flex flex-col justify-center">
+                
+                <!-- SOAL 1: MENJODOHKAN (DIATUR SANGAT KOMPAK) -->
+                <div id="quiz-step-1" class="quiz-step space-y-2">
+                    <h3 class="font-bold text-slate-700 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-circle-question text-teal-600"></i> Soal 1: Menjodohkan Istilah Fisika
+                    </h3>
+                    
+                    <div class="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 leading-snug flex items-start gap-2">
+                        <i class="fa-solid fa-info-circle text-teal-600 mt-0.5 text-xs"></i>
+                        <div>
+                            Tarik (drag) kotak istilah di kiri dan letakkan di definisi yang pas di kanan. 
+                            <span class="text-teal-600 font-semibold">Sentuh layar:</span> Klik satu istilah lalu klik kotak definisi tujuannya.
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pt-1">
+                        <!-- Sisi Kiri: Istilah -->
+                        <div class="md:col-span-4 space-y-2">
+                            <div id="terms-container" class="grid grid-cols-2 md:grid-cols-1 gap-1.5">
+                                <div id="term-massa" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('massa')" class="term-card bg-teal-50 border border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="massa">
+                                    <span>Massa (<i>m</i>)</span>
+                                    <i class="fa-solid fa-grip-lines text-teal-300 text-[10px]"></i>
+                                </div>
+                                <div id="term-gaya" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('gaya')" class="term-card bg-teal-50 border border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="gaya">
+                                    <span>Gaya (<i>F</i>)</span>
+                                    <i class="fa-solid fa-grip-lines text-teal-300 text-[10px]"></i>
+                                </div>
+                                <div id="term-percepatan" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('percepatan')" class="term-card bg-teal-50 border border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="percepatan">
+                                    <span>Percepatan (<i>a</i>)</span>
+                                    <i class="fa-solid fa-grip-lines text-teal-300 text-[10px]"></i>
+                                </div>
+                                <div id="term-gesek" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('gesek')" class="term-card bg-teal-50 border border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="gesek">
+                                    <span>Gaya Gesek (<i>f<sub>k</sub></i>)</span>
+                                    <i class="fa-solid fa-grip-lines text-teal-300 text-[10px]"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sisi Kanan: Definisi -->
+                        <div class="md:col-span-8 space-y-1.5">
+                            <div class="space-y-1.5">
+                                <div ondragover="allowDrop(event)" ondrop="drop(event, 'massa')" onclick="clickSelectZone('massa')" class="drop-zone bg-white border border-dashed border-slate-300 rounded-lg p-2 min-h-[46px] flex items-center justify-between gap-3 transition-all hover:border-teal-400" data-target="massa">
+                                    <span class="text-[11px] text-slate-600 flex-grow leading-tight">Ukuran kelembaman/inersia benda, bersatuan Kilogram (kg).</span>
+                                    <div class="zone-slot w-28 h-8 bg-slate-50 rounded border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 font-semibold italic flex-shrink-0">Jatuhkan di sini</div>
+                                </div>
+                                <div ondragover="allowDrop(event)" ondrop="drop(event, 'gaya')" onclick="clickSelectZone('gaya')" class="drop-zone bg-white border border-dashed border-slate-300 rounded-lg p-2 min-h-[46px] flex items-center justify-between gap-3 transition-all hover:border-teal-400" data-target="gaya">
+                                    <span class="text-[11px] text-slate-600 flex-grow leading-tight">Penyebab perubahan keadaan gerak atau bentuk benda, bersatuan Newton (N).</span>
+                                    <div class="zone-slot w-28 h-8 bg-slate-50 rounded border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 font-semibold italic flex-shrink-0">Jatuhkan di sini</div>
+                                </div>
+                                <div ondragover="allowDrop(event)" ondrop="drop(event, 'percepatan')" onclick="clickSelectZone('percepatan')" class="drop-zone bg-white border-2 border-dashed border-slate-300 rounded-lg p-2 min-h-[46px] flex items-center justify-between gap-3 transition-all hover:border-teal-400" data-target="percepatan">
+                                    <span class="text-[11px] text-slate-600 flex-grow leading-tight">Laju perubahan kecepatan benda tiap sekon (m/s<sup>2</sup>).</span>
+                                    <div class="zone-slot w-28 h-8 bg-slate-50 rounded border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 font-semibold italic flex-shrink-0">Jatuhkan di sini</div>
+                                </div>
+                                <div ondragover="allowDrop(event)" ondrop="drop(event, 'gesek')" onclick="clickSelectZone('gesek')" class="drop-zone bg-white border border-dashed border-slate-300 rounded-lg p-2 min-h-[46px] flex items-center justify-between gap-3 transition-all hover:border-teal-400" data-target="gesek">
+                                    <span class="text-[11px] text-slate-600 flex-grow leading-tight">Hambatan permukaan bidang kasar yang melawan kecenderungan gerak.</span>
+                                    <div class="zone-slot w-28 h-8 bg-slate-50 rounded border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 font-semibold italic flex-shrink-0">Jatuhkan di sini</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOAL 2: PILIHAN GANDA KOMPLEKS (DIATUR 2 KOLOM OPTION) -->
+                <div id="quiz-step-2" class="quiz-step hidden space-y-2">
+                    <h3 class="font-bold text-slate-700 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-table text-teal-600"></i> Soal 2: Analisis Tabel Data (Pilihan Ganda Kompleks)
+                    </h3>
+                    
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg shadow-sm">
+                        <table class="min-w-full divide-y divide-slate-200 text-[11px] text-left">
+                            <thead class="bg-slate-50 text-slate-700 font-semibold">
+                                <tr>
+                                    <th class="px-2 py-1 text-center">Percobaan</th>
+                                    <th class="px-2 py-1 text-center">Massa (kg)</th>
+                                    <th class="px-2 py-1 text-center">Gaya Tarik (N)</th>
+                                    <th class="px-2 py-1 text-center">Koefisien Gesek (&mu;<sub>k</sub>)</th>
+                                    <th class="px-2 py-1 text-center">Gaya Gesek (N)</th>
+                                    <th class="px-2 py-1 text-center">Percepatan (m/s<sup>2</sup>)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-600 bg-white font-mono">
+                                <tr>
+                                    <td class="px-2 py-0.5 text-center font-bold text-slate-800">A</td>
+                                    <td class="px-2 py-0.5 text-center">2.0</td>
+                                    <td class="px-2 py-0.5 text-center">10.0</td>
+                                    <td class="px-2 py-0.5 text-center">0.20</td>
+                                    <td class="px-2 py-0.5 text-center">3.92</td>
+                                    <td class="px-2 py-0.5 text-center font-bold text-emerald-600">3.04</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-0.5 text-center font-bold text-slate-800">B</td>
+                                    <td class="px-2 py-0.5 text-center">4.0</td>
+                                    <td class="px-2 py-0.5 text-center">10.0</td>
+                                    <td class="px-2 py-0.5 text-center">0.20</td>
+                                    <td class="px-2 py-0.5 text-center">7.84</td>
+                                    <td class="px-2 py-0.5 text-center font-bold text-emerald-600">0.54</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-0.5 text-center font-bold text-slate-800">C</td>
+                                    <td class="px-2 py-0.5 text-center">2.0</td>
+                                    <td class="px-2 py-0.5 text-center">15.0</td>
+                                    <td class="px-2 py-0.5 text-center">0.50</td>
+                                    <td class="px-2 py-0.5 text-center">9.80</td>
+                                    <td class="px-2 py-0.5 text-center font-bold text-emerald-600">2.60</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-0.5 text-center font-bold text-slate-800">D</td>
+                                    <td class="px-2 py-0.5 text-center">5.0</td>
+                                    <td class="px-2 py-0.5 text-center">5.0</td>
+                                    <td class="px-2 py-0.5 text-center">0.20</td>
+                                    <td class="px-2 py-0.5 text-center">9.80</td>
+                                    <td class="px-2 py-0.5 text-center font-bold text-red-500">0.00 (Diam)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="text-[11px] font-semibold text-slate-700 leading-tight">
+                        Pilih semua pernyataan yang bernilai <b>BENAR</b> (Jawaban benar lebih dari satu):
+                    </p>
+
+                    <!-- Diubah Menjadi 2 Kolom Pada Desktop Agar Tidak Tinggi ke Bawah -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2" id="mc-options-container">
+                        <label class="flex items-start gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                            <input type="checkbox" id="opt-1" class="mt-0.5 w-3.5 h-3.5 text-teal-600 rounded focus:ring-teal-500 flex-shrink-0">
+                            <span class="text-[10.5px] text-slate-700 leading-snug">
+                                Pada percobaan D, balok tetap diam karena gaya tarik (5.0 N) < Gaya Gesek Kinetik (9.80 N).
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                            <input type="checkbox" id="opt-2" class="mt-0.5 w-3.5 h-3.5 text-teal-600 rounded focus:ring-teal-500 flex-shrink-0">
+                            <span class="text-[10.5px] text-slate-700 leading-snug">
+                                Percobaan A dan B membuktikan bahwa saat gaya konstan (10.0 N), pertambahan massa menurunkan percepatan secara drastis.
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                            <input type="checkbox" id="opt-3" class="mt-0.5 w-3.5 h-3.5 text-teal-600 rounded focus:ring-teal-500 flex-shrink-0">
+                            <span class="text-[10.5px] text-slate-700 leading-snug">
+                                Percobaan C menghasilkan percepatan paling besar karena gaya tariknya paling besar (15.0 N).
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                            <input type="checkbox" id="opt-4" class="mt-0.5 w-3.5 h-3.5 text-teal-600 rounded focus:ring-teal-500 flex-shrink-0">
+                            <span class="text-[10.5px] text-slate-700 leading-snug">
+                                Gaya gesek kinetik percobaan B (7.84 N) tepat dua kali lipat lebih besar dibanding percobaan A (3.92 N).
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all md:col-span-2">
+                            <input type="checkbox" id="opt-5" class="mt-0.5 w-3.5 h-3.5 text-teal-600 rounded focus:ring-teal-500 flex-shrink-0">
+                            <span class="text-[10.5px] text-slate-700 leading-snug">
+                                Jika bidang C diubah menjadi licin sempurna (&mu; = 0.00), percepatannya meningkat menjadi tepat 5.00 m/s<sup>2</sup>.
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- SOAL 3: PILIHAN GANDA SINGLE (DIATUR 2 KOLOM SECARA HORIZONTAL) -->
+                <div id="quiz-step-3" class="quiz-step hidden space-y-2">
+                    <h3 class="font-bold text-slate-700 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-circle-question text-teal-600"></i> Soal 3: Analisis Sistem Katrol (Pilihan Ganda)
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div class="md:col-span-3 bg-slate-50 p-2 rounded-xl border border-slate-200 flex items-center justify-center shadow-inner">
+                            <svg class="mx-auto" width="130" height="130" viewBox="0 0 160 160">
+                                <line x1="20" y1="15" x2="140" y2="10" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+                                <line x1="30" y1="10" x2="25" y2="15" stroke="#cbd5e1" stroke-width="2"/>
+                                <line x1="50" y1="10" x2="45" y2="15" stroke="#cbd5e1" stroke-width="2"/>
+                                <line x1="70" y1="10" x2="60" y2="15" stroke="#cbd5e1" stroke-width="2"/>
+                                <line x1="90" y1="10" x2="90" y2="15" stroke="#cbd5e1" stroke-width="2"/>
+                                <line x1="110" y1="10" x2="110" y2="15" stroke="#cbd5e1" stroke-width="2"/>
+                                <line x1="130" y1="10" x2="110" y2="15" stroke="#cbd5e1" stroke-width="2"/>
+                                <line x1="80" y1="10" x2="80" y2="40" stroke="#475569" stroke-width="3" />
+                                <circle cx="80" cy="50" r="18" fill="#94a3b8" stroke="#334155" stroke-width="3"/>
+                                <circle cx="80" cy="50" r="4" fill="#334155"/>
+                                <line x1="62" y1="50" x2="62" y2="100" stroke="#475569" stroke-width="2"/>
+                                <line x1="98" y1="50" x2="98" y2="75" stroke="#475569" stroke-width="2"/>
+                                <rect x="51" y="100" width="22" height="22" fill="#3b82f6" stroke="#1e3a8a" stroke-width="2" rx="3"/>
+                                <text x="62" y="115" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">m1</text>
+                                <rect x="87" y="75" width="22" height="22" fill="#ec4899" stroke="#9d174d" stroke-width="2" rx="3"/>
+                                <text x="98" y="90" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">m2</text>
+                                <text x="45" y="115" fill="#475569" font-size="10" font-weight="bold" text-anchor="end">m1 = 3 kg</text>
+                                <text x="114" y="90" fill="#ec4899" font-size="10" font-weight="bold" text-anchor="start">m2 = 5 kg</text>
+                            </svg>
+                        </div>
+
+                        <div class="md:col-span-9 space-y-2">
+                            <p class="text-[11px] text-slate-700 leading-relaxed">
+                                Dua beban <b>m<sub>1</sub> = 3 kg</b> and <b>m<sub>2</sub> = 5 kg</b> dihubungkan tali ringan melalui katrol licin. Jika dilepas dari keadaan diam (<i>g = 9.8 m/s<sup>2</sup></i>), berapakah percepatan (<i>a</i>) sistem?
+                            </p>
+
+                            <!-- Ditata 2 Kolom Grid Horizontal -->
+                            <div class="grid grid-cols-2 gap-1.5" id="s3-options-container">
+                                <label class="soal3-label flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                                    <input type="radio" name="soal3" id="opt3-a" class="w-3.5 h-3.5 text-teal-600 focus:ring-teal-500 flex-shrink-0">
+                                    <span class="text-[11px] text-slate-700"><b>A.</b> 1.225 m/s<sup>2</sup></span>
+                                </label>
+                                <label class="soal3-label flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                                    <input type="radio" name="soal3" id="opt3-b" class="w-3.5 h-3.5 text-teal-600 focus:ring-teal-500 flex-shrink-0">
+                                    <span class="text-[11px] text-slate-700"><b>B.</b> 2.450 m/s<sup>2</sup></span>
+                                </label>
+                                <label class="soal3-label flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                                    <input type="radio" name="soal3" id="opt3-c" class="w-3.5 h-3.5 text-teal-600 focus:ring-teal-500 flex-shrink-0">
+                                    <span class="text-[11px] text-slate-700"><b>C.</b> 4.900 m/s<sup>2</sup></span>
+                                </label>
+                                <label class="soal3-label flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                                    <input type="radio" name="soal3" id="opt3-d" class="w-3.5 h-3.5 text-teal-600 focus:ring-teal-500 flex-shrink-0">
+                                    <span class="text-[11px] text-slate-700"><b>D.</b> 7.350 m/s<sup>2</sup></span>
+                                </label>
+                                <label class="soal3-label flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all col-span-2">
+                                    <input type="radio" name="soal3" id="opt3-e" class="w-3.5 h-3.5 text-teal-600 focus:ring-teal-500 flex-shrink-0">
+                                    <span class="text-[11px] text-slate-700"><b>E.</b> 9.800 m/s<sup>2</sup></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOAL 4: ISIAN SINGKAT TEGANGAN TALI (NEW - KOMPAK) -->
+                <div id="quiz-step-4" class="quiz-step hidden space-y-2">
+                    <h3 class="font-bold text-slate-700 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-pen-to-square text-teal-600"></i> Soal 4: Menghitung Gaya Tegangan Tali (Isian Singkat)
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div class="md:col-span-3 bg-slate-50 p-2 rounded-xl border border-slate-200 flex items-center justify-center shadow-inner">
+                            <svg class="mx-auto" width="200" height="100" viewBox="0 0 240 140">
+                                <line x1="10" y1="95" x2="230" y2="95" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                                <line x1="20" y1="95" x2="15" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="40" y1="95" x2="35" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="60" y1="95" x2="55" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="80" y1="95" x2="75" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="100" y1="95" x2="95" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="120" y1="95" x2="115" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="140" y1="95" x2="135" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="160" y1="95" x2="155" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="180" y1="95" x2="175" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="200" y1="95" x2="195" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="220" y1="95" x2="215" y2="102" stroke="#94a3b8" stroke-width="1.5" />
+                                <rect x="30" y="55" width="40" height="40" fill="#3b82f6" stroke="#1e3a8a" stroke-width="2" rx="4"/>
+                                <text x="50" y="79" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">m1</text>
+                                <line x1="70" y1="75" x2="130" y2="75" stroke="#475569" stroke-width="2" stroke-dasharray="4 2"/>
+                                <text x="100" y="68" fill="#475569" font-size="10" font-weight="bold" text-anchor="middle">T</text>
+                                <rect x="130" y="55" width="40" height="40" fill="#ec4899" stroke="#9d174d" stroke-width="2" rx="4"/>
+                                <text x="150" y="79" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">m2</text>
+                                <line x1="170" y1="75" x2="210" y2="75" stroke="#10b981" stroke-width="3"/>
+                                <polygon points="210,71 220,75 210,79" fill="#10b981"/>
+                                <text x="195" y="65" fill="#047857" font-size="10" font-weight="bold" text-anchor="middle">F = 40 N</text>
+                                <text x="35" y="120" fill="#334155" font-size="9" font-weight="bold">m1 = 3 kg</text>
+                                <text x="115" y="120" fill="#ec4899" font-size="9" font-weight="bold">m2 = 5 kg</text>
+                                <text x="195" y="120" fill="#475569" font-size="9" font-weight="bold">&mu;k = 0.20</text>
+                            </svg>
+                        </div>
+
+                        <div class="md:col-span-9 space-y-2">
+                            <p class="text-[11px] text-slate-700 leading-relaxed">
+                                Dua balok <b>m<sub>1</sub> = 3 kg</b> and <b>m<sub>2</sub> = 5 kg</b> terhubung tali ringan pada bidang horizontal kasar (&mu;<sub>k</sub> = 0.20). Jika m<sub>2</sub> ditarik gaya horizontal <b>F = 40 N</b> ke kanan (<i>g = 9.8 m/s<sup>2</sup></i>), hitunglah gaya tegangan tali (<b>T</b>) penghubung kedua balok!
+                            </p>
+
+                            <div class="soal4-container flex items-center gap-3 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all max-w-sm">
+                                <span class="text-[11px] font-semibold text-slate-600">Jawaban Anda:</span>
+                                <div class="relative rounded shadow-sm w-36">
+                                    <input type="number" id="opt4-input" step="any" class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-2 pr-10 text-[11px] border-gray-300 rounded p-1 border font-bold text-slate-800" placeholder="0.0">
+                                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 text-[10px] font-bold">Newton</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LAYAR HASIL SKOR AKHIR (REVOLUSIONER TANPA SCROLL) -->
+                <div id="quiz-step-result" class="quiz-step hidden space-y-3 py-1">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <div class="md:col-span-5 bg-slate-50 rounded-xl p-3 border border-slate-200 shadow-sm text-center">
+                            <div id="result-icon-container" class="text-3xl mb-1">
+                                <!-- Diisi dinamis oleh JS -->
+                            </div>
+                            <h3 class="text-sm font-black text-slate-800 leading-tight">Hasil Evaluasi Belajar</h3>
+                            <p class="text-[9px] text-slate-400">Hukum II Newton &bull; Fase F Kelas XI</p>
+                            
+                            <!-- Lingkaran Skor Lebih Kecil -->
+                            <div class="my-2 inline-flex items-center justify-center w-20 h-20 rounded-full bg-teal-50 border-2 border-teal-500 shadow-inner">
+                                <div class="text-center">
+                                    <span id="result-score-percent" class="block text-xl font-black text-teal-600">100</span>
+                                    <span class="text-[8px] text-teal-500 font-bold uppercase tracking-widest">Skor</span>
+                                </div>
+                            </div>
+
+                            <!-- Komentar Motivasi Ringkas -->
+                            <div class="p-2 rounded-lg bg-white border border-slate-100 shadow-xs text-[11px] text-slate-700 leading-snug font-semibold" id="result-comment">
+                                <!-- Diisi dinamis oleh JS -->
+                            </div>
+                        </div>
+
+                        <!-- Ringkasan Tinjauan Jawaban Berkemampuan Scroll Internal (Anti Halaman Melar) -->
+                        <div class="md:col-span-7 bg-white p-3 rounded-xl border border-slate-100 shadow-sm text-left">
+                            <h4 class="font-bold text-slate-700 text-xs border-b pb-1 mb-2 flex items-center gap-1">
+                                <i class="fa-solid fa-list-check text-teal-600"></i>
+                                <span>Tinjauan Butir Soal</span>
+                            </h4>
+                            <div class="space-y-1.5 text-[10px] text-slate-600 max-h-48 overflow-y-auto pr-1" id="result-breakdown">
+                                <!-- Diisi dinamis oleh JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CONTROLS NAVIGASI WIZARD (DIDESAIN RAMPING) -->
+            <div id="quiz-controls" class="flex items-center justify-between pt-2 border-t border-gray-100 mt-2">
+                <button id="quiz-btn-prev" onclick="navigateQuiz(-1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-1.5 px-3 rounded-lg transition-all flex items-center gap-1 text-[11px]">
+                    <i class="fa-solid fa-arrow-left"></i> Sebelumnya
+                </button>
+                
+                <div id="latihan-feedback" class="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                    <i class="fa-solid fa-circle-info"></i> Soal <span id="quiz-current-num">1</span> dari 4
+                </div>
+
+                <button id="quiz-btn-next" onclick="navigateQuiz(1)" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm transition-all flex items-center gap-1 text-[11px]">
+                    <span>Selanjutnya</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= TAB 6: PENGEMBANG ================= -->
+        <div id="tab-pengembang" class="tab-content hidden bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+            <div class="border-b border-gray-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-circle-user text-teal-600 mr-2"></i>Profil Pengembang</h2>
+                <p class="text-sm text-gray-500 mt-1">Informasi pemilik dan pencipta media pembelajaran interaktif</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                <!-- Avatar / Foto Pengembang -->
+                <div class="relative flex-shrink-0">
+                    <div class="w-48 h-48 rounded-2xl bg-slate-100 border-4 border-teal-500 overflow-hidden flex items-center justify-center shadow-lg relative group">
+                        <!-- Menggunakan foto pengembang yang diambil dari folder assets -->
+                        <img id="img-pengembang" src="assets/img/profil.png" alt="Foto Sukaryadi, S.Pd" class="w-full h-full object-cover object-top" onerror="this.style.display='none'; document.getElementById('fallback-avatar').classList.remove('hidden');">
+                        
+                        <!-- Fallback ke ikon SVG apabila gambar profil.jpg tidak ditemukan/gagal dimuat -->
+                        <div id="fallback-avatar" class="hidden w-40 h-40 flex items-center justify-center">
+                            <svg class="w-40 h-40 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Badge "Guru" -->
+                        <div class="absolute bottom-2 bg-teal-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider z-10 shadow">
+                            Sukaryadi,S.Pd
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Identitas Pengembang -->
+                <div class="flex-grow space-y-4 text-center md:text-left">
+                    <div>
+                        <h3 class="text-2xl font-extrabold text-slate-800">Sukaryadi, S.Pd</h3>
+                        <p class="text-teal-600 font-medium text-sm">Guru Ahli Madya</p>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-4 space-y-3 max-w-lg">
+                        <div class="flex items-center gap-3 justify-center md:justify-start text-sm">
+                            <div class="w-8 h-8 bg-slate-100 text-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-school"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Instansi Asal</p>
+                                <p class="font-semibold text-slate-700">SMA Negeri 1 Karanggede</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 justify-center md:justify-start text-sm">
+                            <div class="w-8 h-8 bg-slate-100 text-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Wilayah Kerja</p>
+                                <p class="font-semibold text-slate-700">Boyolali, Jawa Tengah, Indonesia</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 justify-center md:justify-start text-sm">
+                            <div class="w-8 h-8 bg-slate-100 text-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-laptop-code"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Fokus Pengembangan</p>
+                                <p class="font-semibold text-slate-700">Media Pembelajaran Fisika Berbasis IT (Web-Lab)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs text-slate-500 leading-relaxed max-w-lg">
+                        "Teknologi tidak akan pernah menggantikan guru yang hebat, melainkan di tangan guru yang hebat, teknologi dapat menjadi alat pembelajaran yang transformatif bagi kemajuan masa depan generasi bangsa."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-400 py-3 border-t border-slate-700 text-center text-[10px]">
+        <div class="max-w-7xl mx-auto px-4 space-y-1">
+            <p>Lab Maya Versi 1.0, Sukaryadi @SMAN 1 Karanggede &bull; Kelas XI / Fase F</p>
+        </div>
+    </footer>
+
+    <!-- Script Utama Logika Simulasi, Suara, Grafik & Latihan -->
+    <script>
+        // ================= GLOBAL CONFIGS & STATE =================
+        const g = 9.8; // Percepatan gravitasi (m/s^2)
+        let isRunning = false;
+        let isSoundMuted = false;
+        let animationId = null;
+
+        // Status Dinamik Balok
+        let pos = 50;       // Posisi balok di layar (pixel relatif)
+        let vel = 0.0;      // Kecepatan balok (m/s)
+        let acc = 0.0;      // Percepatan instantaneous balok (m/s^2)
+        let tLast = 0;      // Waktu frame sebelumnya
+        let elapsedTime = 0.0; // Waktu tempuh gerak aktual balok (sekon)
+
+        // Game State Soal Latihan (Wizard)
+        let quizStep = 1;
+        let selectedTerm = null;
+        let activeDraggedId = null;
+
+        // Data Grafik
+        let chartInstance = null;
+        let chartMassaInstance = null;
+        let chartWaktuInstance = null;
+
+        // Web Audio API context
+        let audioCtx = null;
+
+        // Elemen DOM
+        const slideMassa = document.getElementById('slide-massa');
+        const slideGaya = document.getElementById('slide-gaya');
+        const slideGesek = document.getElementById('slide-gesek');
+
+        const valMassa = document.getElementById('val-massa');
+        const valGaya = document.getElementById('val-gaya');
+        const valGesek = document.getElementById('val-gesek');
+
+        const calcNormal = document.getElementById('calc-normal');
+        const calcGesek = document.getElementById('calc-gesek');
+        const calcNetto = document.getElementById('calc-netto');
+        const calcPercepatan = document.getElementById('calc-percepatan');
+
+        const btnPlay = document.getElementById('btn-start');
+        const playIcon = document.getElementById('play-icon');
+        const playText = document.getElementById('play-text');
+        const simStatus = document.getElementById('sim-status');
+
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // ================= INISIALISASI AWAL =================
+        window.addEventListener('load', () => {
+            initCanvas();
+            initChart();
+            updateSimulation();
+            updateQuizWizardUI();
+            
+            // Re-render canvas saat ukuran layar berubah
+            window.addEventListener('resize', () => {
+                initCanvas();
+                draw();
+            });
+        });
+
+        // ================= KONTROL TAB MENU =================
+        function switchTab(tabId) {
+            // Sembunyikan semua tab
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Tampilkan tab terpilih
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Set styling tombol navigasi aktif
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-slate-700 hover:bg-slate-600 text-slate-200";
+            });
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn px-3 py-1.5 rounded-lg font-semibold text-xs transition-all bg-teal-500 text-white shadow-md";
+            }
+
+            // Mainkan suara klik tombol
+            playSynthSound(440, 'triangle', 0.05);
+        }
+
+        // ================= AUDIO SYNTHESIZER (Web Audio API) =================
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Membuat efek suara sintetis
+        function playSynthSound(frequency, type = 'sine', duration = 0.1, volume = 0.1) {
+            if (isSoundMuted) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                
+                gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio API not supported / blocked by gesture.");
+            }
+        }
+
+        function playEngineSound(speed, acceleration) {
+            if (isSoundMuted || speed <= 0) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                let freq = 60 + (speed * 12) + (acceleration * 25);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(Math.min(freq, 600), audioCtx.currentTime);
+                
+                let vol = 0.02 + (speed * 0.015);
+                vol = Math.min(vol, 0.15);
+                
+                gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+                osc.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            isSoundMuted = !isSoundMuted;
+            const soundIcon = document.getElementById('sound-icon');
+            const btnSound = document.getElementById('btn-sound');
+            
+            if (isSoundMuted) {
+                soundIcon.className = "fa-solid fa-volume-xmark";
+                btnSound.classList.replace('bg-gray-100', 'bg-rose-100');
+                btnSound.classList.replace('text-slate-500', 'text-rose-600');
+            } else {
+                soundIcon.className = "fa-solid fa-volume-high";
+                btnSound.classList.replace('bg-rose-100', 'bg-gray-100');
+                btnSound.classList.replace('text-rose-600', 'text-slate-500');
+                playSynthSound(523.25, 'sine', 0.15, 0.1); // C5 tone on unmute
+            }
+        }
+
+        // ================= KANVAS SIMULASI & GAMBAR (2D) =================
+        function initCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        function draw() {
+            const w = canvas.width / window.devicePixelRatio;
+            const h = canvas.height / window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Gambar Langit/Background Atas
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(0, 0, w, h);
+
+            // 2. Gambar Lintasan Meja (Horizontal)
+            const groundY = h - 50;
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(w, groundY);
+            ctx.stroke();
+
+            // Serat-serat permukaan meja
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 2;
+            const step = 30;
+            const offset = (pos * 2.5) % step; 
+            for (let x = -step; x < w + step; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x - offset, groundY);
+                ctx.lineTo(x - offset - 10, groundY + 12);
+                ctx.stroke();
+            }
+
+            // Kaki-kaki meja penyangga bidang
+            ctx.fillStyle = "#64748b";
+            ctx.fillRect(30, groundY + 4, 15, 46);
+            ctx.fillRect(w - 45, groundY + 4, 15, 46);
+
+            // 3. Gambar Katrol di Ujung Kanan
+            const wheelX = w - 30;
+            const wheelY = groundY - 15;
+            const wheelRadius = 15;
+            
+            ctx.strokeStyle = "#334155";
+            ctx.fillStyle = "#94a3b8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(wheelX, wheelY, wheelRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = "#334155";
+            ctx.beginPath();
+            ctx.arc(wheelX, wheelY, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 4. Gambar Balok di Atas Lintasan Meja
+            const blockWidth = 75;
+            const blockHeight = 45;
+            const blockX = pos;
+            const blockY = groundY - blockHeight - 2;
+
+            const massRatio = parseFloat(slideMassa.value) / 10;
+            const blockColor = `rgb(${70 - (massRatio * 40)}, ${140 - (massRatio * 50)}, ${200 - (massRatio * 80)})`;
+            
+            ctx.fillStyle = "rgba(15, 23, 42, 0.15)";
+            ctx.fillRect(blockX + 2, groundY - 2, blockWidth - 4, 4);
+
+            ctx.fillStyle = blockColor;
+            ctx.fillRect(blockX, blockY, blockWidth, blockHeight);
+            
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(blockX, blockY, blockWidth, blockHeight);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 13px Courier New";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`${parseFloat(slideMassa.value).toFixed(1)} kg`, blockX + (blockWidth / 2), blockY + (blockHeight / 2));
+
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.arc(blockX + 15, groundY - 5, 5, 0, Math.PI * 2);
+            ctx.arc(blockX + blockWidth - 15, groundY - 5, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 5. Tali Penarik dari Balok ke Katrol
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(blockX + blockWidth, blockY + (blockHeight / 2));
+            ctx.lineTo(wheelX, wheelY - wheelRadius + 15);
+            ctx.stroke();
+
+            // 6. Gambar Vektor Gaya Tarik (F) - Panah Hijau
+            const forceVal = parseFloat(slideGaya.value);
+            const arrowScale = Math.min(20 + forceVal * 5, 130);
+            const startArrowX = blockX + blockWidth;
+            const startArrowY = blockY + (blockHeight / 2);
+            const endArrowX = startArrowX + arrowScale;
+
+            ctx.strokeStyle = "#10b981"; 
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(startArrowX, startArrowY);
+            ctx.lineTo(endArrowX, startArrowY);
+            ctx.stroke();
+            
+            ctx.fillStyle = "#10b981";
+            ctx.beginPath();
+            ctx.moveTo(endArrowX, startArrowY);
+            ctx.lineTo(endArrowX - 10, startArrowY - 6);
+            ctx.lineTo(endArrowX - 10, startArrowY + 6);
+            ctx.fill();
+
+            ctx.fillStyle = "#065f46";
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText("F = " + forceVal.toFixed(1) + " N", endArrowX + 5, startArrowY + 3);
+
+            // 7. Gambar Vektor Gaya Gesek (f_k) - Panah Kuning/Merah Kiri
+            const m = parseFloat(slideMassa.value);
+            const mu = parseFloat(slideGesek.value);
+            const fk = mu * m * g;
+            if (fk > 0) {
+                const frictionScale = Math.min(10 + fk * 5, 120);
+                const startFrictionX = blockX;
+                const endFrictionX = blockX - frictionScale;
+
+                ctx.strokeStyle = "#f59e0b"; 
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.moveTo(startFrictionX, startArrowY);
+                ctx.lineTo(endFrictionX, startArrowY);
+                ctx.stroke();
+
+                ctx.fillStyle = "#f59e0b";
+                ctx.beginPath();
+                ctx.moveTo(endFrictionX, startArrowY);
+                ctx.lineTo(endFrictionX + 8, startArrowY - 5);
+                ctx.lineTo(endFrictionX + 8, startArrowY + 5);
+                ctx.fill();
+
+                ctx.fillStyle = "#92400e";
+                ctx.font = "bold 10px sans-serif";
+                ctx.textAlign = "right";
+                ctx.fillText("f_k = " + fk.toFixed(2) + " N", endFrictionX - 5, startArrowY + 3);
+            }
+        }
+
+        // ================= HITUNG DINAMIKA & UPDATE SIMULASI =================
+        function updateSimulation() {
+            const m = parseFloat(slideMassa.value);
+            const F = parseFloat(slideGaya.value);
+            const mu = parseFloat(slideGesek.value);
+
+            valMassa.textContent = `${m.toFixed(1)} kg`;
+            valGaya.textContent = `${F.toFixed(1)} N`;
+            valGesek.textContent = mu.toFixed(2);
+
+            const N = m * g;
+            calcNormal.textContent = `${N.toFixed(2)} N`;
+
+            const fk = mu * N;
+            calcGesek.textContent = `${fk.toFixed(2)} N`;
+
+            let fNet = F - fk;
+            let displayAcc = fNet / m;
+
+            if (!isRunning && vel === 0) {
+                if (F <= fk) {
+                    fNet = 0;
+                    displayAcc = 0;
+                }
+            } else if (isRunning) {
+                fNet = F - fk;
+                displayAcc = fNet / m;
+                if (vel === 0 && F <= fk) {
+                    fNet = 0;
+                    displayAcc = 0;
+                }
+            } else {
+                if (F <= fk) {
+                    fNet = 0;
+                    displayAcc = 0;
+                }
+            }
+
+            calcNetto.textContent = `${fNet.toFixed(2)} N`;
+
+            if (displayAcc > 0.01) {
+                calcPercepatan.className = "font-mono text-sm font-extrabold text-emerald-500 animate-pulse";
+                calcPercepatan.textContent = `+${displayAcc.toFixed(2)} m/s²`;
+                acc = displayAcc;
+            } else if (displayAcc < -0.01) {
+                calcPercepatan.className = "font-mono text-sm font-extrabold text-amber-500";
+                calcPercepatan.textContent = `${displayAcc.toFixed(2)} m/s²`;
+                acc = displayAcc;
+            } else {
+                calcPercepatan.className = "font-mono text-sm font-extrabold text-slate-400";
+                calcPercepatan.textContent = `0.00 m/s²`;
+                acc = 0;
+            }
+
+            plotRealTimeGraph(F, displayAcc);
+
+            if (!isRunning) {
+                draw();
+            }
+        }
+
+        // ================= LOOP FRAME ANIMASI BERJALAN =================
+        function togglePlay() {
+            initAudio(); 
+            isRunning = !isRunning;
+
+            if (isRunning) {
+                playIcon.className = "fa-solid fa-pause";
+                playText.textContent = "Jeda";
+                
+                if (pos === 50) {
+                    elapsedTime = 0.0;
+                    if (chartWaktuInstance) {
+                        chartWaktuInstance.data.datasets[1].data = [{ x: 0, y: 0 }];
+                        chartWaktuInstance.update();
+                    }
+                }
+
+                tLast = performance.now();
+                playSynthSound(587.33, 'square', 0.2, 0.08); 
+                animationId = requestAnimationFrame(loop);
+            } else {
+                pauseSimulation();
+            }
+        }
+
+        function pauseSimulation() {
+            isRunning = false;
+            playIcon.className = "fa-solid fa-play";
+            playText.textContent = "Jalankan";
+            simStatus.textContent = "Status: Diam";
+            simStatus.className = "text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md font-mono";
+            
+            playSynthSound(392, 'sine', 0.15, 0.08); 
+
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function loop(timestamp) {
+            if (!isRunning) return;
+
+            const dt = (timestamp - tLast) / 1000;
+            tLast = timestamp;
+            elapsedTime += dt;
+
+            const m = parseFloat(slideMassa.value);
+            const F = parseFloat(slideGaya.value);
+            const mu = parseFloat(slideGesek.value);
+            const N = m * g;
+            const fk = mu * N;
+
+            if (vel > 0) {
+                acc = (F - fk) / m;
+                vel += acc * dt;
+                if (vel < 0) {
+                    vel = 0;
+                    acc = 0;
+                }
+            } else {
+                if (F > fk) {
+                    acc = (F - fk) / m;
+                    vel += acc * dt;
+                } else {
+                    acc = 0;
+                    vel = 0;
+                }
+            }
+
+            pos += vel * dt * 45;
+            updateSimulation();
+
+            if (chartWaktuInstance) {
+                chartWaktuInstance.data.datasets[1].data.push({ x: elapsedTime, y: vel });
+                chartWaktuInstance.update('none'); 
+            }
+
+            if (vel > 0) {
+                if (acc > 0.01) {
+                    simStatus.textContent = "Status: Dipercepat \u2191";
+                    simStatus.className = "text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md font-mono font-bold animate-pulse";
+                } else if (acc < -0.01) {
+                    simStatus.textContent = "Status: Diperlambat \u2193";
+                    simStatus.className = "text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-md font-mono font-bold";
+                } else {
+                    simStatus.textContent = "Status: Kecepatan Konstan";
+                    simStatus.className = "text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded-md font-mono font-bold";
+                }
+                playEngineSound(vel, acc);
+            } else {
+                simStatus.textContent = "Status: Diam";
+                simStatus.className = "text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md font-mono";
+            }
+
+            const w = canvas.width / window.devicePixelRatio;
+            const blockWidth = 75;
+            const blockXLimit = w - blockWidth - 40; 
+
+            document.getElementById('hud-vel').textContent = `${vel.toFixed(2)} m/s`;
+            document.getElementById('hud-pos').textContent = `${((pos - 50) / 45).toFixed(2)} m`;
+
+            if (pos >= blockXLimit) {
+                pos = blockXLimit;
+                vel = 0;
+                acc = 0;
+                pauseSimulation();
+                simStatus.textContent = "Status: Mentok Katrol!";
+                simStatus.className = "text-xs bg-red-100 text-red-800 px-2 py-1 rounded-md font-mono font-bold";
+                playSynthSound(220, 'sawtooth', 0.4, 0.12);
+            }
+
+            draw();
+
+            if (isRunning) {
+                animationId = requestAnimationFrame(loop);
+            }
+        }
+
+        function resetSimulation() {
+            pauseSimulation();
+
+            slideMassa.value = "5.0";
+            slideGaya.value = "10";
+            slideGesek.value = "0.20";
+
+            pos = 50;
+            vel = 0.0;
+            acc = 0.0;
+            elapsedTime = 0.0;
+
+            document.getElementById('hud-vel').textContent = `0.00 m/s`;
+            document.getElementById('hud-pos').textContent = `0.00 m`;
+            simStatus.textContent = "Status: Diam";
+            simStatus.className = "text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md font-mono";
+
+            if (chartWaktuInstance) {
+                chartWaktuInstance.data.datasets[1].data = [{ x: 0, y: 0 }];
+                chartWaktuInstance.update();
+            }
+
+            playSynthSound(523.25, 'sine', 0.1, 0.06); 
+            setTimeout(() => playSynthSound(392, 'sine', 0.1, 0.06), 80); 
+            setTimeout(() => playSynthSound(329.63, 'sine', 0.15, 0.06), 160); 
+
+            updateSimulation();
+            draw();
+        }
+
+        // ================= DIAGRAM & GRAFIK (Chart.js) =================
+        function initChart() {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { boxWidth: 6, font: { size: 8 } }
+                    }
+                }
+            };
+
+            const ctxGraph = document.getElementById('graph-canvas').getContext('2d');
+            chartInstance = new Chart(ctxGraph, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Teoritis',
+                            data: [],
+                            borderColor: '#0d9488', 
+                            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                            borderWidth: 1.5,
+                            pointRadius: 1,
+                            showLine: true,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Direkam',
+                            data: [],
+                            borderColor: '#e11d48', 
+                            backgroundColor: '#e11d48',
+                            borderWidth: 0,
+                            pointRadius: 4,
+                            pointStyle: 'rectRot',
+                            showLine: false 
+                        }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: false },
+                            min: 0, max: 20, ticks: { font: { size: 8 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: { display: false },
+                            min: 0, max: 20, ticks: { font: { size: 8 } }
+                        }
+                    }
+                }
+            });
+
+            const ctxMassaGraph = document.getElementById('graph-massa-canvas').getContext('2d');
+            chartMassaInstance = new Chart(ctxMassaGraph, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Teoritis',
+                            data: [],
+                            borderColor: '#4f46e5', 
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 1.5,
+                            pointRadius: 1,
+                            showLine: true,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Direkam',
+                            data: [],
+                            borderColor: '#e11d48', 
+                            backgroundColor: '#e11d48',
+                            borderWidth: 0,
+                            pointRadius: 4,
+                            pointStyle: 'rectRot',
+                            showLine: false 
+                        }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: false },
+                            min: 1, max: 10, ticks: { font: { size: 8 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: { display: false },
+                            min: 0, max: 20, ticks: { font: { size: 8 } }
+                        }
+                    }
+                }
+            });
+
+            const ctxWaktuGraph = document.getElementById('graph-waktu-canvas').getContext('2d');
+            chartWaktuInstance = new Chart(ctxWaktuGraph, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Prediksi',
+                            data: [],
+                            borderColor: '#b45309', 
+                            borderDash: [4, 4],
+                            borderWidth: 1.2,
+                            pointRadius: 0,
+                            showLine: true,
+                            fill: false
+                        },
+                        {
+                            label: 'Aktual',
+                            data: [{ x: 0, y: 0 }],
+                            borderColor: '#10b981', 
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            showLine: true,
+                            fill: true,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: false },
+                            min: 0, max: 5, ticks: { font: { size: 8 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: { display: false },
+                            min: 0, max: 15, ticks: { font: { size: 8 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function plotRealTimeGraph(force, acceleration) {
+            if (!chartInstance || !chartMassaInstance || !chartWaktuInstance) return;
+
+            const currentM = parseFloat(slideMassa.value);
+            const currentF = parseFloat(slideGaya.value);
+            const currentMu = parseFloat(slideGesek.value);
+
+            const lineFData = [];
+            for (let f = 0; f <= 20; f += 2) {
+                const fk = currentMu * currentM * g;
+                let a = (f - fk) / currentM;
+                if (a < 0) a = 0;
+                lineFData.push({ x: f, y: a });
+            }
+            chartInstance.data.datasets[0].data = lineFData;
+            chartInstance.update('none'); 
+
+            const lineMData = [];
+            for (let m = 1; m <= 10; m += 0.5) {
+                const fk = currentMu * m * g;
+                let a = (currentF - fk) / m;
+                if (a < 0) a = 0;
+                lineMData.push({ x: m, y: a });
+            }
+            chartMassaInstance.data.datasets[0].data = lineMData;
+            chartMassaInstance.update('none'); 
+
+            const lineTData = [];
+            for (let t = 0; t <= 5; t += 1) {
+                lineTData.push({ x: t, y: acc * t });
+            }
+            chartWaktuInstance.data.datasets[0].data = lineTData;
+            chartWaktuInstance.update('none');
+        }
+
+        function rekamTitikData() {
+            if (!chartInstance || !chartMassaInstance) return;
+
+            const currentM = parseFloat(slideMassa.value);
+            const currentF = parseFloat(slideGaya.value);
+            const currentAcc = acc;
+
+            chartInstance.data.datasets[1].data.push({ x: currentF, y: currentAcc });
+            chartInstance.update();
+
+            chartMassaInstance.data.datasets[1].data.push({ x: currentM, y: currentAcc });
+            chartMassaInstance.update();
+
+            playSynthSound(800, 'sine', 0.04, 0.1);
+            setTimeout(() => playSynthSound(1200, 'sine', 0.05, 0.08), 40);
+        }
+
+        function clearGraph() {
+            if (!chartInstance || !chartMassaInstance) return;
+            
+            chartInstance.data.datasets[1].data = [];
+            chartInstance.update();
+
+            chartMassaInstance.data.datasets[1].data = [];
+            chartMassaInstance.update();
+            
+            playSynthSound(300, 'triangle', 0.1, 0.08);
+            setTimeout(() => playSynthSound(150, 'triangle', 0.15, 0.08), 80);
+        }
+
+        // ================= LOGIKA WIZARD SOAL LATIHAN =================
+        function navigateQuiz(direction) {
+            // Ambil langkah selanjutnya
+            let nextStep = quizStep + direction;
+            if (nextStep < 1 || nextStep > 5) return;
+
+            // Jika melangkah ke halaman hasil (step 5), periksa dulu jawabannya
+            if (nextStep === 5) {
+                periksaJawabanLatihan();
+            }
+
+            quizStep = nextStep;
+            updateQuizWizardUI();
+            playSynthSound(500 + (quizStep * 80), 'sine', 0.08, 0.06);
+        }
+
+        function updateQuizWizardUI() {
+            // Sembunyikan semua step soal
+            document.querySelectorAll('.quiz-step').forEach(stepDiv => {
+                stepDiv.classList.add('hidden');
+            });
+
+            // Tampilkan tab terpilih
+            const activeStepId = quizStep === 5 ? 'quiz-step-result' : `quiz-step-${quizStep}`;
+            document.getElementById(activeStepId).classList.remove('hidden');
+
+            // Perbarui Progress Stepper
+            for (let i = 1; i <= 5; i++) {
+                const indicator = document.getElementById(`step-i-${i}`);
+                const line = document.getElementById(`step-l-${i}`);
+
+                if (i < quizStep) {
+                    // Selesai dikerjakan (Hijau)
+                    indicator.className = "w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-[10px] shadow transition-colors";
+                    if (line) line.className = "h-0.5 flex-grow bg-emerald-500 mx-1 transition-colors";
+                } else if (i === quizStep) {
+                    // Sedang dikerjakan (Teal aktif)
+                    indicator.className = "w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shadow-md ring-2 ring-teal-200 transition-colors";
+                    if (line) line.className = "h-0.5 flex-grow bg-slate-200 mx-1 transition-colors";
+                } else {
+                    // Belum dikerjakan (Abu-abu)
+                    indicator.className = "w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-[10px] transition-colors";
+                    if (line) line.className = "h-0.5 flex-grow bg-slate-200 mx-1 transition-colors";
+                }
+            }
+
+            // Atur tombol navigasi
+            const btnPrev = document.getElementById('quiz-btn-prev');
+            const btnNext = document.getElementById('quiz-btn-next');
+            const textNum = document.getElementById('quiz-current-num');
+            const feedbackContainer = document.getElementById('latihan-feedback');
+
+            if (quizStep === 1) {
+                btnPrev.classList.add('opacity-50', 'pointer-events-none');
+            } else {
+                btnPrev.classList.remove('opacity-50', 'pointer-events-none');
+            }
+
+            if (quizStep === 4) {
+                btnNext.innerHTML = `<span>Selesaikan &amp; Lihat Hasil</span> <i class="fa-solid fa-trophy"></i>`;
+                btnNext.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-4 rounded-lg shadow-sm transition-all flex items-center gap-1 text-[11px]";
+            } else if (quizStep === 5) {
+                // Layar Hasil Akhir
+                btnNext.innerHTML = `<span>Ulangi Latihan</span> <i class="fa-solid fa-rotate-left"></i>`;
+                btnNext.className = "bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-4 rounded-lg shadow-sm transition-all flex items-center gap-1 text-[11px]";
+                feedbackContainer.classList.add('hidden');
+            } else {
+                btnNext.innerHTML = `<span>Selanjutnya</span> <i class="fa-solid fa-arrow-right"></i>`;
+                btnNext.className = "bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-4 rounded-lg shadow-sm transition-all flex items-center gap-1 text-[11px]";
+                feedbackContainer.classList.remove('hidden');
+                textNum.textContent = quizStep;
+            }
+        }
+
+        // ================= DRAG & DROP + KLIK HYBRID =================
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+            activeDraggedId = ev.target.id;
+            playSynthSound(600, 'sine', 0.05, 0.05);
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drop(ev, targetId) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text") || activeDraggedId;
+            const draggedElement = document.getElementById(data);
+            if (!draggedElement) return;
+
+            const dropZone = ev.currentTarget;
+            const slot = dropZone.querySelector('.zone-slot');
+            
+            if (slot.children.length === 0) {
+                slot.innerHTML = ''; 
+                slot.appendChild(draggedElement);
+                slot.className = "zone-slot w-28 h-8 bg-teal-50 rounded border border-solid border-teal-500 flex items-center justify-center text-xs text-teal-900 font-bold shadow-sm transition-all";
+                draggedElement.classList.remove('border-teal-600', 'bg-teal-200');
+                selectedTerm = null;
+                playSynthSound(500, 'triangle', 0.08, 0.08);
+            }
+        }
+
+        function clickSelectTerm(termId) {
+            document.querySelectorAll('.term-card').forEach(card => {
+                card.classList.remove('border-teal-600', 'bg-teal-200');
+            });
+
+            const card = document.getElementById(`term-${termId}`);
+            if (selectedTerm === termId) {
+                selectedTerm = null;
+                playSynthSound(300, 'sine', 0.05, 0.05);
+            } else {
+                selectedTerm = termId;
+                card.classList.add('border-teal-600', 'bg-teal-200');
+                playSynthSound(600, 'sine', 0.05, 0.08);
+            }
+        }
+
+        function clickSelectZone(targetId) {
+            if (!selectedTerm) return;
+
+            const draggedElement = document.getElementById(`term-${selectedTerm}`);
+            const dropZone = document.querySelector(`[data-target="${targetId}"]`);
+            const slot = dropZone.querySelector('.zone-slot');
+
+            if (slot.children.length === 0) {
+                slot.innerHTML = '';
+                slot.appendChild(draggedElement);
+                slot.className = "zone-slot w-28 h-8 bg-teal-50 rounded border border-solid border-teal-500 flex items-center justify-center text-xs text-teal-900 font-bold shadow-sm transition-all";
+                draggedElement.classList.remove('border-teal-600', 'bg-teal-200');
+                selectedTerm = null;
+                playSynthSound(500, 'triangle', 0.08, 0.08);
+            }
+        }
+
+        // ================= PEMERIKSAAN & EVALUASI MANDIRI =================
+        function periksaJawabanLatihan() {
+            // 1. Soal 1 (Menjodohkan) - Bobot 4 Poin
+            let s1CorrectCount = 0;
+            const zones = document.querySelectorAll('.drop-zone');
+            let review1HTML = '';
+            
+            zones.forEach(zone => {
+                const target = zone.getAttribute('data-target');
+                const slot = zone.querySelector('.zone-slot');
+                const child = slot.firstElementChild;
+                const indonesianTermName = target === 'massa' ? 'Massa (m)' : 
+                                           target === 'gaya' ? 'Gaya Tarik (F)' : 
+                                           target === 'percepatan' ? 'Percepatan (a)' : 'Gaya Gesek (fk)';
+                
+                if (child) {
+                    const childId = child.getAttribute('data-id');
+                    if (childId === target) {
+                        s1CorrectCount++;
+                        review1HTML += `<div class="flex items-center gap-1"><span class="text-green-500 font-bold"><i class="fa-solid fa-circle-check"></i> Benar</span> &bull; <b>${indonesianTermName}</b> cocok.</div>`;
+                    } else {
+                        review1HTML += `<div class="flex items-center gap-1"><span class="text-red-500 font-bold"><i class="fa-solid fa-circle-xmark"></i> Salah</span> &bull; <b>${indonesianTermName}</b> keliru.</div>`;
+                    }
+                } else {
+                    review1HTML += `<div class="flex items-center gap-1"><span class="text-red-500 font-bold"><i class="fa-solid fa-circle-xmark"></i> Kosong</span> &bull; <b>${indonesianTermName}</b> terlewat.</div>`;
+                }
+            });
+
+            // 2. Soal 2 (Pilihan Ganda Kompleks) - Bobot 1 Poin (Sempurna/Semua Benar)
+            const s2Keys = {
+                'opt-1': true,
+                'opt-2': true,
+                'opt-3': false,
+                'opt-4': true,
+                'opt-5': false
+            };
+            
+            let s2Correct = true;
+            let s2ChecksRight = 0;
+            for (let id in s2Keys) {
+                const checkbox = document.getElementById(id);
+                if (checkbox.checked === s2Keys[id]) {
+                    s2ChecksRight++;
+                } else {
+                    s2Correct = false;
+                }
+            }
+            let s2Score = s2Correct ? 1 : 0;
+            const review2HTML = s2Correct 
+                ? `<div class="flex items-center gap-1"><span class="text-green-500 font-bold"><i class="fa-solid fa-circle-check"></i> Benar</span> &bull; Analisis data tabel Anda sempurna (Pernyataan 1, 2, dan 4).</div>`
+                : `<div class="flex items-center gap-1"><span class="text-red-500 font-bold"><i class="fa-solid fa-circle-xmark"></i> Salah</span> &bull; Analisis tabel kurang tepat. Jawaban benar adalah pernyataan 1, 2, dan 4.</div>`;
+
+            // 3. Soal 3 (Pilihan Ganda Tunggal) - Bobot 1 Poin
+            const s3Checked = document.querySelector('input[name="soal3"]:checked');
+            const s3Correct = s3Checked && s3Checked.id === 'opt3-b';
+            let s3Score = s3Correct ? 1 : 0;
+            const review3HTML = s3Correct
+                ? `<div class="flex items-center gap-1"><span class="text-green-500 font-bold"><i class="fa-solid fa-circle-check"></i> Benar</span> &bull; Percepatan sistem katrol: <b>2.450 m/s<sup>2</sup></b> (B).</div>`
+                : `<div class="flex items-center gap-1"><span class="text-red-500 font-bold"><i class="fa-solid fa-circle-xmark"></i> Salah</span> &bull; Keliru. Rumusnya: a = (m2 - m1)g / (m1 + m2) = 2.450 m/s<sup>2</sup> (B).</div>`;
+
+            // 4. Soal 4 (Isian Singkat) - Bobot 1 Poin
+            const s4Input = document.getElementById('opt4-input');
+            const s4Val = parseFloat(s4Input.value);
+            const s4Correct = !isNaN(s4Val) && Math.abs(s4Val - 15) < 0.01;
+            let s4Score = s4Correct ? 1 : 0;
+            const review4HTML = s4Correct
+                ? `<div class="flex items-center gap-1"><span class="text-green-500 font-bold"><i class="fa-solid fa-circle-check"></i> Benar</span> &bull; Tegangan tali yang dihitung adalah <b>15 N</b>.</div>`
+                : `<div class="flex items-center gap-1"><span class="text-red-500 font-bold"><i class="fa-solid fa-circle-xmark"></i> Salah</span> &bull; Keliru. Perhitungannya menghasilkan: <b>15 N</b> (T = m1(a + &mu;kg)).</div>`;
+
+            // Total Nilai Akhir Skala 100
+            const totalPoints = s1CorrectCount + s2Score + s3Score + s4Score; // Max 7
+            const finalPercent = Math.round((totalPoints / 7) * 100);
+
+            // Tampilkan pada Layar Hasil Akhir
+            document.getElementById('result-score-percent').textContent = finalPercent;
+
+            // Atur Komentar & Ikon Berdasarkan Skor
+            const iconContainer = document.getElementById('result-icon-container');
+            const commentBox = document.getElementById('result-comment');
+
+            if (finalPercent === 100) {
+                iconContainer.innerHTML = `<span class="text-amber-500 animate-bounce inline-block"><i class="fa-solid fa-trophy"></i></span>`;
+                commentBox.innerHTML = `Sempurna! Pemahaman Dinamika Newton Anda luar biasa. Pertahankan prestasi gemilang ini!`;
+                playSynthSound(523.25, 'sine', 0.1, 0.1); 
+                setTimeout(() => playSynthSound(659.25, 'sine', 0.1, 0.1), 100); 
+                setTimeout(() => playSynthSound(783.99, 'sine', 0.25, 0.1), 200); 
+            } else if (finalPercent >= 75) {
+                iconContainer.innerHTML = `<span class="text-amber-400"><i class="fa-solid fa-medal"></i></span>`;
+                commentBox.innerHTML = `Sangat Bagus! Konsep fisis Anda sudah sangat matang. Sikit ketelitian lagi untuk dapat nilai 100!`;
+                playSynthSound(523.25, 'sine', 0.15, 0.1);
+                setTimeout(() => playSynthSound(659.25, 'sine', 0.25, 0.1), 120);
+            } else if (finalPercent >= 50) {
+                iconContainer.innerHTML = `<span class="text-teal-500"><i class="fa-solid fa-thumbs-up"></i></span>`;
+                commentBox.innerHTML = `Cukup Baik! Sudah paham dasarnya. Ulas kembali teori dan coba simulasi lagi.`;
+                playSynthSound(330, 'triangle', 0.2, 0.1);
+            } else {
+                iconContainer.innerHTML = `<span class="text-rose-500"><i class="fa-solid fa-book-bookmark animate-pulse"></i></span>`;
+                commentBox.innerHTML = `Ayo Belajar Lagi! Jangan menyerah. Manfaatkan simulasi lab virtual untuk memperkuat pemahaman.`;
+                playSynthSound(150, 'sawtooth', 0.4, 0.15); 
+            }
+
+            // Tampilkan Ringkasan Evaluasi
+            const breakdown = document.getElementById('result-breakdown');
+            breakdown.innerHTML = `
+                <div class="space-y-2">
+                    <div>
+                        <h5 class="font-bold text-slate-800 text-[9.5px] uppercase tracking-wider mb-0.5">Soal 1: Menjodohkan</h5>
+                        <div class="space-y-0.5 pl-1">${review1HTML}</div>
+                    </div>
+                    <div class="border-t border-slate-100 pt-1">
+                        <h5 class="font-bold text-slate-800 text-[9.5px] uppercase tracking-wider mb-0.5">Soal 2: Pilihan Ganda Kompleks</h5>
+                        <div class="pl-1">${review2HTML}</div>
+                    </div>
+                    <div class="border-t border-slate-100 pt-1">
+                        <h5 class="font-bold text-slate-800 text-[9.5px] uppercase tracking-wider mb-0.5">Soal 3: Katrol Atwood</h5>
+                        <div class="pl-1">${review3HTML}</div>
+                    </div>
+                    <div class="border-t border-slate-100 pt-1">
+                        <h5 class="font-bold text-slate-800 text-[9.5px] uppercase tracking-wider mb-0.5">Soal 4: Tegangan Tali</h5>
+                        <div class="pl-1">${review4HTML}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mengatur ulang posisi game latihan ke step 1
+        function resetLatihan() {
+            // Reset Soal 1 (Menjodohkan)
+            const container = document.getElementById('terms-container');
+            container.innerHTML = `
+                <div id="term-massa" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('massa')" class="term-card bg-teal-50 border-2 border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="massa">
+                    <span>Massa (<i>m</i>)</span>
+                    <i class="fa-solid fa-grip-lines text-teal-300 hidden md:inline"></i>
+                </div>
+                <div id="term-gaya" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('gaya')" class="term-card bg-teal-50 border-2 border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="gaya">
+                    <span>Gaya Tarik (<i>F</i>)</span>
+                    <i class="fa-solid fa-grip-lines text-teal-300 hidden md:inline"></i>
+                </div>
+                <div id="term-percepatan" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('percepatan')" class="term-card bg-teal-50 border-2 border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="percepatan">
+                    <span>Percepatan (<i>a</i>)</span>
+                    <i class="fa-solid fa-grip-lines text-teal-300 hidden md:inline"></i>
+                </div>
+                <div id="term-gesek" draggable="true" ondragstart="drag(event)" onclick="clickSelectTerm('gesek')" class="term-card bg-teal-50 border-2 border-teal-200 p-2 rounded-lg font-bold text-teal-900 text-xs cursor-grab active:cursor-grabbing hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm flex items-center justify-between" data-id="gesek">
+                    <span>Gaya Gesek (<i>f<sub>k</sub></i>)</span>
+                    <i class="fa-solid fa-grip-lines text-teal-300 hidden md:inline"></i>
+                </div>
+            `;
+
+            const zones = document.querySelectorAll('.drop-zone');
+            zones.forEach(zone => {
+                zone.className = "drop-zone bg-white border border-dashed border-slate-300 rounded-lg p-2 min-h-[46px] flex items-center justify-between gap-3 transition-all hover:border-teal-400";
+                const slot = zone.querySelector('.zone-slot');
+                slot.className = "zone-slot w-28 h-8 bg-slate-50 rounded border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 font-semibold italic flex-shrink-0";
+                slot.innerHTML = 'Jatuhkan di sini';
+            });
+
+            // Reset Soal 2 (Pilihan Ganda Kompleks)
+            const s2Ids = ['opt-1', 'opt-2', 'opt-3', 'opt-4', 'opt-5'];
+            s2Ids.forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb) {
+                    cb.checked = false;
+                    const parent = cb.parentElement;
+                    parent.className = "flex items-start gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all";
+                }
+            });
+
+            // Reset Soal 3 (Pilihan Ganda Tunggal)
+            document.querySelectorAll('input[name="soal3"]').forEach(radio => {
+                radio.checked = false;
+            });
+            document.querySelectorAll('.soal3-label').forEach(label => {
+                label.className = "soal3-label flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all";
+            });
+
+            // Reset Soal 4 (Isian Singkat)
+            const s4Input = document.getElementById('opt4-input');
+            if (s4Input) {
+                s4Input.value = '';
+                const parent4 = s4Input.closest('.soal4-container');
+                parent4.className = "soal4-container flex items-center gap-3 p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all max-w-sm";
+            }
+
+            // Kembalikan ke step 1
+            quizStep = 1;
+            updateQuizWizardUI();
+            selectedTerm = null;
+            playSynthSound(400, 'triangle', 0.15, 0.08);
+        }
+
+        // Logic pendukung tombol next/prev latihan
+        window.clickResetLatihan = function() {
+            resetLatihan();
+        };
+
+        // Modifikasi navigasi step 5 ke step 1 jika ditekan "Ulangi Latihan"
+        window.navigateQuizOriginal = navigateQuiz;
+        window.navigateQuiz = function(direction) {
+            if (quizStep === 5 && direction === 1) {
+                resetLatihan();
+            } else {
+                navigateQuizOriginal(direction);
+            }
+        };
+    </script>
+</body>
+</html>
